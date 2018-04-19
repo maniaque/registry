@@ -30,7 +30,8 @@ registry20180419
 
 real    1m25.894s
 user    0m36.112s
-sys     0m12.944s```
+sys     0m12.944s
+```
 
 # А что она в stdout выводит?
 
@@ -51,4 +52,5 @@ sys     0m12.944s```
    PRIMARY KEY (`registry_id`) USING BTREE,
    INDEX (`content_id`),
    INDEX (`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;```
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;
+```
