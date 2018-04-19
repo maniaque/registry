@@ -25,12 +25,12 @@
 
 Дамп в 39 мегабайт разбирает в среднем за полторы минуты.
 
-maniaque@decadence:~/registry.git⟫ time ./registry.import dump.xml
+```maniaque@decadence:~/registry.git⟫ time ./registry.import dump.xml
 registry20180419
 
 real    1m25.894s
 user    0m36.112s
-sys     0m12.944s
+sys     0m12.944s```
 
 # А что она в stdout выводит?
 
