@@ -1,0 +1,8 @@
+<?php
+
+$registry = new stdClass();
+
+$registry->host         = 'localhost';
+$registry->user         = 'registry';
+$registry->password     = '';
+$registry->database     = 'registry';

@@ -1,0 +1,133 @@
+#!/usr/bin/php
+<?php
+
+$dir = dirname(__FILE__);
+
+require($dir . '/DbSimple/Generic.php');
+
+require($dir . '/config');
+
+require($dir . '/SimpleXMLReader.class.php');
+
+$db = DbSimple_Generic::connect(connection_string($registry));
+$db->setErrorHandler('sql_error');
+
+if(count($argv) < 2 || !strlen($argv[1])) fuck('.xml file as first argument, please');
+
+$file = $argv[1];
+if(!file_exists($file)) fuck("file $file does not exists");
+
+class RegistryXmlReader extends SimpleXMLReader {
+  private $db;
+  private $table;
+  private $counter;
+  private $id;
+  private $blockType;
+
+  private $buffer;
+
+  public $error;
+
+  public function __construct($db, $table) {
+    $this->db = $db;
+    $this->table = $table;
+
+    $this->registerCallback("/register/content", array($this, "content"));
+
+    $this->registerCallback("/register/content/url", array($this, "url"));
+    $this->registerCallback("/register/content/domain", array($this, "domain"));
+    $this->registerCallback("/register/content/ip", array($this, "ip"));
+    $this->registerCallback("/register/content/ipSubnet", array($this, "ipSubnet"));
+  }
+
+  protected function content($reader) {
+    $xml = $reader->expandSimpleXml();
+    $attributes = $xml->attributes();
+
+    $attrArray = array();
+    foreach($xml->attributes() as $key=>$val) $attrArray[(string)$key] = (string)$val;
+    $this->id = $attrArray['id'];
+    $this->blockType = isset($attrArray['blockType']) ? $attrArray['blockType'] : 'default';
+
+    return true;
+  }
+
+  protected function url($reader) { return $this->writeDb('url', $reader->expandSimpleXml()); }
+  
+  protected function domain($reader) { return $this->writeDb('domain', $reader->expandSimpleXml()); }
+  
+  protected function ip($reader) { return $this->writeDb('ip', $reader->expandSimpleXml()); }
+  
+  protected function ipSubnet($reader) { return $this->writeDb('subnet', $reader->expandSimpleXml()); }
+
+  private function writeDb($type, $value) {
+    $data = [ 'content_id' => $this->id, 'block_type' => $this->blockType, 'type' => $type, 'value' => $value ];
+    $this->counter++;
+
+    $sql = "INSERT INTO $this->table(?#) VALUES(?a)";
+    $value_id = $this->db->query($sql, array_keys($data), array_values($data));
+    if(!$value_id) {
+      whimper("error on insert of $value");
+      $this->error = true;
+      return false;
+    }
+
+    return true;
+  }
+}
+
+$newTable = 'registry' . date('Ymd');
+$db->query("CREATE TABLE IF NOT EXISTS `$newTable` (
+  `registry_id` int(11) NOT NULL AUTO_INCREMENT,
+  `content_id` int(11) NOT NULL,
+  `block_type` char(11) NOT NULL,
+  `type` char(6) NOT NULL,
+  `value` text NOT NULL,
+   PRIMARY KEY (`registry_id`) USING BTREE,
+   INDEX (`content_id`),
+   INDEX (`type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;");
+
+$db->query("TRUNCATE TABLE $newTable");
+
+$db->query("BEGIN");
+
+$reader = new RegistryXmlReader($db, $newTable);
+$reader->open($file);
+$reader->parse();
+$reader->close();
+
+if($reader->error) fail(); // сообщение об ошибке уже было, fuck() тут не нужен
+
+$db->query("COMMIT");
+
+say($newTable, /* timestamp = */ false);
+win();
+
+function sql_error($message, $info) {
+  if (!error_reporting()) return;
+
+  echo "SQL Error: $message<br><pre>";
+  print_r($info);
+  echo "</pre>";
+} 
+
+function connection_string($object) {
+  return 'mysqli://'.$object->user.':'.$object->password.'@'.$object->host.'/'.$object->database;
+}
+
+function say($text, $ts = true) {
+  $timestamp = date('H:i:s');
+  $v = $ts ? "[$timestamp] " : '';
+  echo "{$v}$text\n";
+}
+
+function whimper($text) { file_put_contents('php://stderr', "$text\n"); }
+
+function fuck($text) { whimper($text); fail(); }
+
+function fail() { exit_with(1); }
+
+function win($text = '') { if(!empty($text)) say($text); exit_with(0); }
+
+function exit_with($code) { exit($code); }
