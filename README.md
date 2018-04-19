@@ -43,7 +43,8 @@ sys     0m12.944s
 
 Канеш.
 
-```CREATE TABLE IF NOT EXISTS `registry20180419` (
+```sql
+CREATE TABLE IF NOT EXISTS `registry20180419` (
   `registry_id` int(11) NOT NULL AUTO_INCREMENT,
   `content_id` int(11) NOT NULL,
   `block_type` char(11) NOT NULL,
@@ -52,4 +53,5 @@ sys     0m12.944s
    PRIMARY KEY (`registry_id`) USING BTREE,
    INDEX (`content_id`),
    INDEX (`type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;```
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;
+```
