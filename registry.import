@@ -88,9 +88,9 @@ $db->query("CREATE TABLE IF NOT EXISTS `$newTable` (
    INDEX (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;");
 
-$db->query("TRUNCATE TABLE $newTable");
-
 $db->query("BEGIN");
+
+$db->query("TRUNCATE TABLE $newTable");
 
 $reader = new RegistryXmlReader($db, $newTable);
 $reader->open($file);
@@ -107,9 +107,8 @@ win();
 function sql_error($message, $info) {
   if (!error_reporting()) return;
 
-  echo "SQL Error: $message<br><pre>";
+  echo "SQL Error: $message\n\n";
   print_r($info);
-  echo "</pre>";
 } 
 
 function connection_string($object) {
