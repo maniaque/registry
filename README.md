@@ -56,3 +56,7 @@ CREATE TABLE IF NOT EXISTS `registry20180419` (
    INDEX (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;
 ```
+
+# Как поблагодарить?
+
+[Можно так](https://yasobe.ru/na/maniaque)
